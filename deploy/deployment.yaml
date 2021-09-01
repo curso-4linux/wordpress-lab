@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   namespace: devops
   labels:
+    app: wordpress
     cattle.io/creator: norman
     workload.user.cattle.io/workloadselector: deployment-devops-mysql
   name: mysql
@@ -64,6 +65,7 @@ kind: Deployment
 metadata:
   namespace: devops
   labels:
+    app: wordpress
     cattle.io/creator: norman
     workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   name: wordpress
@@ -118,6 +120,7 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
+    app: wordpress
     workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   type: NodePort
 status:
