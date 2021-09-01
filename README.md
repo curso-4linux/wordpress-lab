@@ -1,1 +1,1 @@
-# wordpress-lab
+# wordpress
