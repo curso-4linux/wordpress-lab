@@ -65,7 +65,8 @@ metadata:
   namespace: devops
   labels:
     cattle.io/creator: norman
-    workload.user.cattle.io/workloadselector: deployment-devops-wordpress  name: wordpress
+    workload.user.cattle.io/workloadselector: deployment-devops-wordpress
+  name: wordpress
 spec:
   replicas: 2
   selector:
