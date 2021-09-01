@@ -3,17 +3,18 @@ kind: Deployment
 metadata:
   namespace: devops
   labels:
-    app: wordpress
+    cattle.io/creator: norman
+    workload.user.cattle.io/workloadselector: deployment-devops-mysql
   name: mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: wordpress
+      workload.user.cattle.io/workloadselector: deployment-devops-mysql
   template:
     metadata:
       labels:
-        app: wordpress
+        workload.user.cattle.io/workloadselector: deployment-devops-mysql
     spec:
       containers:
       - env:
@@ -43,6 +44,7 @@ metadata:
   namespace: devops
   labels:
     app: wordpress
+    cattle.io/creator: norman
   name: mysql
 spec:
   ports:
@@ -52,6 +54,7 @@ spec:
     targetPort: 3306
   selector:
     app: wordpress
+    workload.user.cattle.io/workloadselector: deployment-devops-mysql
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -61,17 +64,17 @@ kind: Deployment
 metadata:
   namespace: devops
   labels:
-    app: wordpress
-  name: wordpress
+    cattle.io/creator: norman
+    workload.user.cattle.io/workloadselector: deployment-devops-wordpress  name: wordpress
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: wordpress
+      workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   template:
     metadata:
       labels:
-        app: wordpress
+        workload.user.cattle.io/workloadselector: deployment-devops-wordpress
     spec:
       imagePullSecrets:
       - name: pipeline-docker-registry
@@ -104,7 +107,7 @@ kind: Service
 metadata:
   namespace: devops
   labels:
-    app: wordpress
+    cattle.io/creator: norman
   name: wordpress
 spec:
   externalTrafficPolicy: Cluster
@@ -114,7 +117,7 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
-    app: wordpress
+    workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   type: NodePort
 status:
   loadBalancer: {}
@@ -124,7 +127,7 @@ kind: Ingress
 metadata:
   namespace: devops
   labels:
-    app: wordpress
+    cattle.io/creator: norman
   name: wordpress
 spec:
   rules:
