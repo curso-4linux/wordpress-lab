@@ -1,20 +1,18 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: devops
   labels:
-    app: wordpress
-    curso: 4linux
     cattle.io/creator: norman
     workload.user.cattle.io/workloadselector: deployment-devops-mysql
   name: mysql
+  namespace: devops
 spec:
   replicas: 1
   selector:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-devops-mysql
   template:
-    metadata:
       labels:
         workload.user.cattle.io/workloadselector: deployment-devops-mysql
     spec:
@@ -25,12 +23,13 @@ spec:
             secretKeyRef:
               key: mysql-password
               name: mysql-secrets
+              optional: false
         image: mysql:5.6
         imagePullPolicy: Always
         name: mysql
         ports:
         - containerPort: 3306
-          name: mysql
+          name: mysql-port
           protocol: TCP
         volumeMounts:
         - mountPath: /var/lib/mysql
@@ -43,20 +42,19 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: devops
   labels:
-    app: wordpress
     cattle.io/creator: norman
   name: mysql
+  namespace: devops
 spec:
   ports:
-  - name: mysql
+  - name: mysql-port
     port: 3306
     protocol: TCP
     targetPort: 3306
   selector:
-    app: wordpress
     workload.user.cattle.io/workloadselector: deployment-devops-mysql
+  sessionAffinity: None
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -64,24 +62,20 @@ status:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: devops
   labels:
-    app: wordpress
     cattle.io/creator: norman
     workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   name: wordpress
+  namespace: devops
 spec:
   replicas: 2
   selector:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   template:
-    metadata:
       labels:
         workload.user.cattle.io/workloadselector: deployment-devops-wordpress
     spec:
-      imagePullSecrets:
-      - name: pipeline-docker-registry
       containers:
       - env:
         - name: WORDPRESS_DB_HOST
@@ -91,16 +85,17 @@ spec:
             secretKeyRef:
               key: mysql-password
               name: mysql-secrets
-        image: ${CICD_IMAGE}:${CICD_EXECUTION_SEQUENCE}
+              optional: false
+        image: wordpress:4.8-apache
         imagePullPolicy: Always
         name: wordpress
         ports:
         - containerPort: 80
-          name: wordpress-port
-          protocol: TCP
+          name: wordpress
+          protocol: TCP 
         volumeMounts:
         - mountPath: /var/www/html
-          name: wordpress-storage
+          name: wordpress-storage 
       volumes:
       - name: wordpress-storage
         persistentVolumeClaim:
@@ -109,20 +104,20 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: devops
   labels:
     cattle.io/creator: norman
-  name: wordpress
+  name: wordpress-nodeport
+  namespace: devops
 spec:
   externalTrafficPolicy: Cluster
   ports:
-  - name: http
+  - name: wordpress
     port: 80
     protocol: TCP
     targetPort: 80
   selector:
-    app: wordpress
     workload.user.cattle.io/workloadselector: deployment-devops-wordpress
+  sessionAffinity: None
   type: NodePort
 status:
   loadBalancer: {}
@@ -130,18 +125,15 @@ status:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  namespace: devops
   labels:
     cattle.io/creator: norman
   name: wordpress
+  namespace: devops
 spec:
   rules:
   - host: wordpress.devops.35.247.229.217.nip.io
     http:
       paths:
       - backend:
-          serviceName: wordpress
+          serviceName: wordpress-nodeport
           servicePort: 80
-        path: /
-status:
-  loadBalancer: {}
