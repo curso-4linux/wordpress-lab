@@ -13,6 +13,7 @@ spec:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-devops-mysql
   template:
+    metadata:
       labels:
         workload.user.cattle.io/workloadselector: deployment-devops-mysql
     spec:
@@ -73,6 +74,7 @@ spec:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-devops-wordpress
   template:
+    metadata:
       labels:
         workload.user.cattle.io/workloadselector: deployment-devops-wordpress
     spec:
